@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  go-client:
+    build: .
+    volumes:
+      - ./:/usr/src/app
+    networks:
+      - shared-services
+
+networks:
+  shared-services:
+    external: true
