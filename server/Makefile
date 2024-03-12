@@ -12,9 +12,3 @@ login:
 
 logs:
 	docker-compose logs --tail=10 -f
-
-testing:
-	docker-compose run -w /usr/src/app go-client-server /bin/sh -c "npm t"
-
-testing-watch:
-	docker-compose run -w /usr/src/app go-client-server /bin/sh -c "npm run test:watch"
