@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  go-client-server:
+    build: .
+    ports:
+      - 8081:8081
+    volumes:
+      - ./:/usr/src/app
+    networks:
+      - shared-services
+
+networks:
+  shared-services:
+    external: true

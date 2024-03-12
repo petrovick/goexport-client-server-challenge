@@ -1,4 +1,4 @@
-module github.com/petrovick/goexport-client-server-challenge
+module goserver
 
 go 1.20
 

@@ -13,16 +13,33 @@ import (
 	"github.com/google/uuid"
 )
 
+type Cotacao struct {
+	USDBRL CotacaoUSDBRL `json:"USDBRL"`
+}
+
+type CotacaoUSDBRL struct {
+	Code        string  `json:"code"`
+	Codein      string  `json:"codein"`
+	Name        string  `json:"name"`
+	High        string  `json:"high"`
+	Low         string  `json:"low"`
+	Bid         float64 `json:"bid,string"`
+	Ask         string  `json:"ask"`
+	Create_date string  `json:"create_date"`
+}
+
 func main() {
+	log.Println("Initializing server")
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8080", nil)
+	if err := http.ListenAndServe(":8081", nil); err != nil {
+		log.Fatalf("Failed to start server: %s", err)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request iniciada")
 
-	body := []byte(`{"USDBRL":{"bid":"4.9825"}}`) // getRealAndDollarPrice()
-	println(string(body))
+	body := getRealAndDollarPrice()
 
 	var cotacao Cotacao
 	err := json.Unmarshal(body, &cotacao)
@@ -52,17 +69,22 @@ func getRealAndDollarPrice() []byte {
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("Erro ao ler os dados da API")
+		panic(err)
+	}
+
 	return body
 }
 
 func saveToDatabase(c *Cotacao) {
-	db, err := sql.Open("mysql", "root:12345678@tcp(localhost:3306)/goexpert")
+	db, err := sql.Open("mysql", "root:12345678@tcp(mysql-5.7:3306)/goexpert")
 	if err != nil {
 		log.Println("Erro ao conectar no banco de dados")
 		panic(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Millisecond)
 	defer cancel()
 
 	stmt, err := db.Prepare("insert into prices(id, value, updated_at) values(?, ?, ?)")
@@ -76,19 +98,4 @@ func saveToDatabase(c *Cotacao) {
 		log.Println("Erro ao executar insert no banco de dados")
 		panic(err)
 	}
-}
-
-type Cotacao struct {
-	USDBRL CotacaoUSDBRL `json:"USDBRL"`
-}
-
-type CotacaoUSDBRL struct {
-	Code        string  `json:"code"`
-	Codein      string  `json:"codein"`
-	Name        string  `json:"name"`
-	High        string  `json:"high"`
-	Low         string  `json:"low"`
-	Bid         float64 `json:"bid,string"`
-	Ask         string  `json:"ask"`
-	Create_date string  `json:"create_date"`
 }
