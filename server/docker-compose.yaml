@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  go-client-server:
+  go-server:
     build: .
     ports:
       - 8081:8081
@@ -9,6 +9,20 @@ services:
       - ./:/usr/src/app
     networks:
       - shared-services
+    depends_on:
+      - sqlite-init
+
+  sqlite-init:
+    image: nouchka/sqlite3
+    entrypoint: ["sqlite3", "/root/db/goexpert-database.db"]
+    volumes:
+      - ./data:/root/db
+      - ./init.sql:/root/db/init.sql
+    command:
+      - ".read /root/db/init.sql"
+    environment:
+      - SQLITE_DATABASE=/root/db/goexpert-database.db
+      # - CGO_ENABLED=1
 
 networks:
   shared-services:

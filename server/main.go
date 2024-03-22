@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Cotacao struct {
@@ -26,6 +26,10 @@ type CotacaoUSDBRL struct {
 	Bid         float64 `json:"bid,string"`
 	Ask         string  `json:"ask"`
 	Create_date string  `json:"create_date"`
+}
+
+type CotacaoDTO struct {
+	Bid float64
 }
 
 func main() {
@@ -49,6 +53,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	saveToDatabase(&cotacao)
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	var cotacaoDTO CotacaoDTO = CotacaoDTO{}
+	cotacaoDTO.Bid = cotacao.USDBRL.Bid
+
+	result, err := json.Marshal(cotacaoDTO)
+
+	w.Write(result)
 	defer log.Println("Request finalizada")
 }
 
@@ -78,7 +90,7 @@ func getRealAndDollarPrice() []byte {
 }
 
 func saveToDatabase(c *Cotacao) {
-	db, err := sql.Open("mysql", "root:12345678@tcp(mysql-5.7:3306)/goexpert")
+	db, err := sql.Open("sqlite3", "./data/goexpert-database.db")
 	if err != nil {
 		log.Println("Erro ao conectar no banco de dados")
 		panic(err)

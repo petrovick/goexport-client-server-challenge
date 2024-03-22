@@ -1,8 +1,14 @@
+## Instruções para execução
+Siga as intruções abaixo.
+
+### Rodando o servidor
 ```
-CREATE TABLE `goexpert`.`prices` (
-  `id` VARCHAR(255) NOT NULL,
-  `value` FLOAT NULL,
-  `updated_at` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`));
+cd server && make down build down up logs
+
+```
+
+### Rodando o client
+```
+cd client && make down build down up logs
 
 ```

@@ -5,10 +5,13 @@ build:
 	docker-compose build
 	
 up: down
-	WATCH_FILES=0 docker-compose up -d
+	docker-compose up -d
 
 login:
-	docker-compose run -w /usr/src/app go-client-server /bin/sh
+	docker-compose run -w /usr/src/app go-server /bin/sh
+
+login-sqlite:
+	docker-compose run -w /usr/src/app sqlite-init /bin/sh
 
 logs:
 	docker-compose logs --tail=10 -f
