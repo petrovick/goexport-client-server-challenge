@@ -1,0 +1,20 @@
+package quotation
+
+type Quotation struct {
+	USDBRL QuotationUSDBRL `json:"USDBRL"`
+}
+
+type QuotationUSDBRL struct {
+	Code        string  `json:"code"`
+	Codein      string  `json:"codein"`
+	Name        string  `json:"name"`
+	High        string  `json:"high"`
+	Low         string  `json:"low"`
+	Bid         float64 `json:"bid,string"`
+	Ask         string  `json:"ask"`
+	Create_date string  `json:"create_date"`
+}
+
+type QuotationDTO struct {
+	Bid float64
+}
