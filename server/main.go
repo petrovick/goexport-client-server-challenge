@@ -35,7 +35,7 @@ type QuotationDTO struct {
 func main() {
 	log.Println("Initializing server")
 	http.HandleFunc("/cotacao", quotationHandler)
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Failed to start server: %s", err)
 	}
 }
