@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type CotacaoUSDBRL struct {
+type QuotationUSDBRL struct {
 	Bid float64 `json:"bid"`
 }
 
@@ -19,25 +19,24 @@ func main() {
 	body := getRealAndDollarPrice()
 	log.Println(body)
 
-	var cotacao CotacaoUSDBRL
-	err := json.Unmarshal(body, &cotacao)
+	var quotation QuotationUSDBRL
+	err := json.Unmarshal(body, &quotation)
 	if err != nil {
 		log.Println("Erro ao parsear dados do JSON")
 		panic(err)
 	}
 
-	log.Println(cotacao)
-	writeToFile(&cotacao)
+	log.Println(quotation)
+	writeToFile(&quotation)
 }
 
-func writeToFile(cotacao *CotacaoUSDBRL) {
+func writeToFile(quotation *QuotationUSDBRL) {
 	f, err := os.Create("arquivo.txt")
 	if err != nil {
 		panic(err)
 	}
 
-	tamanho, err := f.Write([]byte(fmt.Sprintf("Dólar: %f", cotacao.Bid)))
-	// tamanho, err := f.WriteString("Hello, World!")
+	tamanho, err := f.Write([]byte(fmt.Sprintf("Dólar: %f", quotation.Bid)))
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +48,7 @@ func getRealAndDollarPrice() []byte {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", "http://go-server:8081/", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://go-server:8081/cotacao", nil)
 	if err != nil {
 		log.Println("Erro ao montar requisição dos dados da cotação")
 		panic(err)
