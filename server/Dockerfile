@@ -15,20 +15,21 @@ WORKDIR /usr/src/app
 
 RUN export CGO_ENABLED=1
 
-COPY . .
+COPY go.mod main.go ./
 
 RUN go mod tidy
 
 RUN go env -w CGO_ENABLED=1
 
-CMD cd /usr/src/app && \
-    CGO_ENABLED=1 go run main.go
+RUN CGO_ENABLED=1 go build
 
-# # Step 2
-# FROM golang:1.20-alpine as final
+CMD ["tail", "-f", "/dev/null"]
 
-# WORKDIR /usr/src/app
+# Step 2
+FROM scratch as final
 
-# COPY --from=BUILDER /usr/src/app/goserver ./goserver
+WORKDIR /usr/src/app
 
-# CMD ["./goserver"]
+COPY --from=BUILDER /usr/src/app/server ./server
+
+CMD ["./server"]

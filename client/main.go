@@ -48,7 +48,7 @@ func getRealAndDollarPrice() []byte {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", "http://go-server:8080/cotacao", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
 		log.Println("Erro ao montar requisição dos dados da cotação")
 		panic(err)

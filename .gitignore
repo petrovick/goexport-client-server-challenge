@@ -1,2 +1,3 @@
 client/arquivo.txt
 server/data/goexpert-database.db
+server/data/init.sql

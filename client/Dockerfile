@@ -3,16 +3,17 @@ FROM golang:1.20-alpine as BUILDER
 
 WORKDIR /usr/src/app
 
-COPY . .
+COPY go.mod main.go ./
 
-CMD cd /usr/src/app && \
-    go run main.go
+RUN go build
 
-# # Step 2
-# FROM golang:1.20-alpine as final
+CMD ["tail", "-f", "/dev/null"]
 
-# WORKDIR /usr/src/app
+# Step 2
+FROM scratch as final
 
-# COPY --from=BUILDER /usr/src/app/goserver ./goserver
+WORKDIR /usr/src/app
 
-# CMD ["./goserver"]
+COPY --from=BUILDER /usr/src/app/client ./client
+
+CMD ["./client"]
