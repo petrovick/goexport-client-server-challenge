@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -10,7 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type Quotation struct {
@@ -30,6 +30,13 @@ type QuotationUSDBRL struct {
 
 type QuotationDTO struct {
 	Bid float64
+}
+
+type QuotationsModel struct {
+	ID        string `gorm:"primaryKey"`
+	Value     float64
+	UpdatedAt string
+	gorm.Model
 }
 
 func main() {
@@ -66,7 +73,7 @@ func quotationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRealAndDollarQuotation() []byte {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
 	awesomeUrl := "https://economia.awesomeapi.com.br/json/last/USD-BRL"
@@ -94,24 +101,32 @@ func getRealAndDollarQuotation() []byte {
 }
 
 func saveToDatabase(quotation *Quotation) {
-	db, err := sql.Open("sqlite3", "./data/goexpert-database.db")
+	db, err := gorm.Open(sqlite.Open("goexpert-database.db"), &gorm.Config{})
 	if err != nil {
 		log.Println("Erro ao conectar no banco de dados")
 		panic(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	db.AutoMigrate(&QuotationsModel{})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
 	defer cancel()
 
-	stmt, err := db.Prepare("insert into quotations(id, value, updated_at) values(?, ?, ?)")
-	if err != nil {
-		log.Println("Erro ao preparar stetement no banco de dados")
-		panic(err)
+	quotationsModel := QuotationsModel{
+		ID:        (uuid.New().String()),
+		Value:     quotation.USDBRL.Bid,
+		UpdatedAt: quotation.USDBRL.Create_date,
 	}
 
-	_, err = stmt.ExecContext(ctx, uuid.New().String(), quotation.USDBRL.Bid, quotation.USDBRL.Create_date)
-	if err != nil {
-		log.Println("Erro ao executar insert no banco de dados")
-		panic(err)
+	db.WithContext(ctx).Create(&quotationsModel)
+	ContextExecution(ctx, "DB")
+}
+
+func ContextExecution(ctx context.Context, name string) {
+	select {
+	case <-ctx.Done():
+		panic("Time exceeded in " + name)
+	case <-time.After(time.Millisecond * 10):
+		println("success")
 	}
 }
